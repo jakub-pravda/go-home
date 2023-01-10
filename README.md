@@ -14,3 +14,13 @@ go run cmd/tss/main.go \
 --trv-topic 'myhome-kr/livingroom/danfoss-thermo-01' \
 --cron '*/15 * * * *'
 ```
+
+
+## Nix
+
+It's possible to build nix derivation by following set of commands
+
+```
+$ nix develop
+$ gomod2nix
+```
