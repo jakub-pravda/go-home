@@ -14,9 +14,17 @@
             overlays = [ gomod2nix.overlays.default ];
           };
 
+          everything = pkgs.buildGoApplication {
+            pname = "go-home";
+            version = "1.0.0";
+            src = ./.;
+            modules = ./gomod2nix.toml;
+
+            buildInputs = with pkgs; [ pkg-config libaom libavif ];
+          };
         in
         {
-          packages.default = pkgs.callPackage ./. { };
+          packages.default = everything;
           devShells.default = import ./shell.nix { inherit pkgs; };
         })
     );
