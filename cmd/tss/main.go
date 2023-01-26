@@ -88,7 +88,7 @@ func main() {
 	if *trvTopic == "" {
 		log.Fatalf("Error! Thermostatic radiator valve topic must be set")
 	} else {
-		log.Printf("Thermostatic radiator valve topic to subscribe: %s", *sensorTopic)
+		log.Printf("Thermostatic radiator valve topic to subscribe: %s", *trvTopic)
 	}
 
 	if *cron == "" {
@@ -98,7 +98,7 @@ func main() {
 	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
-	externalMeasuredRoomSensorTopic := fmt.Sprintf("%s/set/external_measured_room_sensor", *sensorTopic)
+	externalMeasuredRoomSensorTopic := fmt.Sprintf("%s/set/external_measured_room_sensor", *trvTopic)
 
 	connOpts := MQTT.NewClientOptions().AddBroker(*mqttBroker).SetClientID("test-client").SetCleanSession(true).SetDefaultPublishHandler(onSensorMessageReceived)
 
