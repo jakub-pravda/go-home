@@ -130,8 +130,8 @@ func TestTemperatureUpdateNeeded(t *testing.T) {
 	var temperature int
 	testTimeTables := []TimeTable{
 		{
-			Start: 36000, // 10:00
-			End:   72000, // 20:00
+			Start:       36000, // 10:00
+			End:         72000, // 20:00
 			Temperature: 25,
 		},
 	}

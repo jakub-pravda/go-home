@@ -33,7 +33,6 @@ func (i *schedulersConfigs) Set(value string) error {
 	if err != nil {
 		log.Fatalf("Can't parse scheduler config: %v", err)
 	}
-	// TODO check if the same topic is not already in the list
 	// TODO check overlapping time ranges
 	*i = append(*i, result)
 	return nil
@@ -45,7 +44,11 @@ func checkAndUpdate(client MQTT.Client, schedulers schedulersConfigs) {
 		if update {
 			heatingSetpointTopic := fmt.Sprintf("%s/set/occupied_heating_setpoint_scheduled", scheduler.Topic)
 			log.Printf("Updating %s to %d°C", heatingSetpointTopic, temperature)
-			client.Publish(heatingSetpointTopic, 0, false, temperature)
+			if token := client.Publish(heatingSetpointTopic, 0, false, fmt.Sprintf("%d", temperature)); token.Wait() && token.Error() != nil {
+				log.Printf("Error publishing to topic %s: %v", heatingSetpointTopic, token.Error())
+			} else {
+				log.Printf("Published temperature %d°C to topic %s", temperature, heatingSetpointTopic)
+			}
 		}
 	}
 }
@@ -61,9 +64,15 @@ func main() {
 
 	connOpts := MQTT.NewClientOptions().AddBroker(*mqttBroker).SetClientID("tsc").SetCleanSession(true)
 	client := MQTT.NewClient(connOpts)
+	if token := client.Connect(); token.Wait() && token.Error() != nil {
+		log.Fatalf("Error, broker connection failed: %s", token.Error())
+	} else {
+		log.Printf("Connected to the MQTT broker")
+	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
 	scheduler.Every(1).Minute().Do(checkAndUpdate, client, schedulers)
+	scheduler.StartAsync()
 
 	wait := utils.GracefulShutdown(context.Background(), 30*time.Second, map[string]utils.Operation{
 		"close-mqtt": func(ctx context.Context) error {

@@ -13,14 +13,14 @@ var mu sync.Mutex
 var lastTemperatures = make(map[string]int)
 
 type TimeTable struct {
-	Start       int64   `json:"start"` // seconds from midnight
-	End         int64   `json:"end"`   // seconds from midnight
-	Temperature int `json:"temperature"`
+	Start       int64 `json:"start"` // seconds from midnight
+	End         int64 `json:"end"`   // seconds from midnight
+	Temperature int   `json:"temperature"`
 }
 
 type TemperatureScheduler struct {
 	Topic              string      `json:"topic"`
-	DefaultTemperature int     `json:"defaultTemperature"`
+	DefaultTemperature int         `json:"defaultTemperature"`
 	TimeTable          []TimeTable `json:"timeTable"`
 }
 
@@ -48,18 +48,16 @@ func getTemperatureAtTime(scheduler TemperatureScheduler, time time.Time) int {
 }
 
 // Check if temperature update is needed
-//  in: scheduler - temperature scheduler table
-//  out: bool - true if update is needed; tempature - temperature to set (0 if update not needed)
+//
+//	in: scheduler - temperature scheduler table
+//	out: bool - true if update is needed; tempature - temperature to set (0 if update not needed)
 func temperatureUpdateNeeded(scheduler TemperatureScheduler, time time.Time) (bool, int) {
 	mu.Lock()
 	defer mu.Unlock()
-	
-	for k, v := range lastTemperatures {
-		log.Printf("DEBUG JPR: %s: %d", k, v)
-	}
 
 	temperature := getTemperatureAtTime(scheduler, time)
-	lastTemperature, exist := lastTemperatures[scheduler.Topic]; if exist {
+	lastTemperature, exist := lastTemperatures[scheduler.Topic]
+	if exist {
 		if lastTemperature != temperature {
 			log.Printf("Temperature update needed for %s, last: %d, current: %d", scheduler.Topic, lastTemperature, temperature)
 			lastTemperatures[scheduler.Topic] = temperature
