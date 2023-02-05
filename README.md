@@ -24,3 +24,9 @@ It's possible to build nix derivation by following set of commands
 $ nix develop
 $ gomod2nix
 ```
+
+# TSC (Temperature scheduler)
+
+```bash
+ go run ./cmd/tsc/main.go ./cmd/tsc/utils.go --scheduler '{ "topic": "myhome-kr/livingroom/danfoss-thermo-01", "defaultTemperature": 22, "timeTable": [ { "start": "22:00", "end": "06:00", "temperature": 18 } ] }'
+```
