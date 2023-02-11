@@ -1,7 +1,5 @@
 package main
 
-// TODO not sure if this is ok (to have multiple mains in one project)
-
 import (
 	"context"
 	"flag"

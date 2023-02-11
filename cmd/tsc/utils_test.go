@@ -20,7 +20,17 @@ func TestIfTimeTableParsedCorrectly(t *testing.T) {
 		]
 	}`
 
-	// TODO expected
+	expected := TemperatureScheduler{
+		Topic:              "myhome-kr/livingroom/danfoss-thermo-01",
+		DefaultTemperature: 22,
+		TimeTable: []TimeTable{
+			TimeTable{
+				Start:       79200, // 22:00
+				End:         21600, // 06:00
+				Temperature: 18,
+			},
+		},
+	}
 
 	result, err := parseTimeTable(testData)
 
@@ -28,6 +38,10 @@ func TestIfTimeTableParsedCorrectly(t *testing.T) {
 
 	if err != nil {
 		log.Fatalf(err.Error())
+	}
+
+	if result.Topic != expected.Topic || result.DefaultTemperature != expected.DefaultTemperature || result.TimeTable[0] != expected.TimeTable[0] {
+		log.Fatal("Timetable test parsing failed")
 	}
 }
 
