@@ -105,6 +105,22 @@ func parseTimeTable(tempSchedulerJson string) (TemperatureScheduler, error) {
 	return tempScheduler, nil
 }
 
+// Detect time table overlaps
+func checkTimeTableOverlap(scheduler TemperatureScheduler) {
+	for i, timeTable := range scheduler.TimeTable {
+		for j, timeTable2 := range scheduler.TimeTable {
+			if i != j && checksOverlaps(timeTable, timeTable2) {
+				log.Fatalf("Time table overlap detected: %s", scheduler.Topic)
+			}
+		}
+	}
+}
+
+// Check if time table overlaps
+func checksOverlaps(t1 TimeTable, t2 TimeTable) bool {
+	return t1.Start <= t2.End && t2.Start <= t1.End
+}
+
 func getSecondsFromMidnight(hours int, minutes int) int64 {
 	date := time.Date(1970, 1, 1, hours, minutes, 0, 0, time.UTC)
 	return date.Unix()

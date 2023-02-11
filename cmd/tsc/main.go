@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	schedulers schedulersConfigs
+	temperatureSchedulers schedulersConfigs
 
 	// input args
 	mqttBroker = flag.String("broker", "tcp://localhost:1883", "MQTT broker connection string")
@@ -33,7 +33,6 @@ func (i *schedulersConfigs) Set(value string) error {
 	if err != nil {
 		log.Fatalf("Can't parse scheduler config: %v", err)
 	}
-	// TODO check overlapping time ranges
 	*i = append(*i, result)
 	return nil
 }
@@ -56,11 +55,16 @@ func checkAndUpdate(client MQTT.Client, schedulers schedulersConfigs) {
 func main() {
 	log.Printf("=== Starting TRV temperature scheduler ===")
 
-	flag.Var(&schedulers, "scheduler", "Scheduler configuration (use format json formatted string: '{\"topic\": \"topic1\", \"defaultTemperature\": 22, \"timeTable\": [{\"start\": \"22:30\", \"end\": \"05:30\", \"temperature\": 18}]}'))")
+	flag.Var(&temperatureSchedulers, "scheduler", "Scheduler configuration (use format json formatted string: '{\"topic\": \"topic1\", \"defaultTemperature\": 22, \"timeTable\": [{\"start\": \"22:30\", \"end\": \"05:30\", \"temperature\": 18}]}'))")
 	flag.Parse()
 
-	log.Printf("Schedulers: %v", schedulers)
+	log.Printf("Schedulers: %v", temperatureSchedulers)
 	log.Printf("MQTT broker host: %s", *mqttBroker)
+
+	// check schedulers overlaps
+	for _, temperatureScheduler := range temperatureSchedulers {
+		checkTimeTableOverlap(temperatureScheduler)
+	}
 
 	connOpts := MQTT.NewClientOptions().AddBroker(*mqttBroker).SetClientID("tsc").SetCleanSession(true)
 	client := MQTT.NewClient(connOpts)
@@ -71,7 +75,7 @@ func main() {
 	}
 
 	scheduler := gocron.NewScheduler(time.UTC)
-	scheduler.Every(1).Minute().Do(checkAndUpdate, client, schedulers)
+	scheduler.Every(1).Minute().Do(checkAndUpdate, client, temperatureSchedulers)
 	scheduler.StartAsync()
 
 	wait := utils.GracefulShutdown(context.Background(), 30*time.Second, map[string]utils.Operation{

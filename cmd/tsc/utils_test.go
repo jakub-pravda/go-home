@@ -169,3 +169,76 @@ func TestTemperatureUpdateNeeded(t *testing.T) {
 		log.Fatalf("temperatureUpdateNeeded #3 failed, temperature should be 25, got: %d", temperature)
 	}
 }
+
+func TestChecksOverlaps(t *testing.T) {
+	var t1, t2 TimeTable
+
+	// should not overlap
+	// t1 08:00 - 10:00
+	// t2 11:00 - 12:00
+	t1 = TimeTable{
+		Start: 3600 * 8,
+		End:   3600 * 10,
+	}
+
+	// should not overlap
+	t2 = TimeTable{
+		Start: 3600 * 11,
+		End:   3600 * 12,
+	}
+
+	if checksOverlaps(t1, t2) {
+		log.Fatal("checksOverlaps #0 failed, should not overlap")
+	}
+
+	// should overlap
+	// t1 08:00 - 10:00
+	// t2 08:30 - 11:00
+	t1 = TimeTable{Start: 3600 * 8,
+		End: 3600 * 10,
+	}
+
+	// should not overlap
+	t2 = TimeTable{
+
+		Start: 3600 * 8.5,
+		End:   3600 * 11,
+	}
+	if !checksOverlaps(t1, t2) {
+		log.Fatal("checksOverlaps #1 failed, should overlap")
+	}
+
+	// should overlap
+	// t1 08:00 - 10:00
+	// t2 06:00 - 08:30
+	t1 = TimeTable{
+		Start: 3600 * 8,
+		End:   3600 * 10,
+	}
+
+	// should not overlap
+	t2 = TimeTable{
+		Start: 3600 * 6,
+		End:   3600 * 8.5,
+	}
+	if !checksOverlaps(t1, t2) {
+		log.Fatal("checksOverlaps #2 failed, should overlap")
+	}
+
+	// should overlap
+	// t1 08:00 - 10:00
+	// t2 06:00 - 12:00
+	t1 = TimeTable{
+		Start: 3600 * 8,
+		End:   3600 * 10,
+	}
+
+	// should not overlap
+	t2 = TimeTable{
+		Start: 3600 * 6,
+		End:   3600 * 12,
+	}
+	if !checksOverlaps(t1, t2) {
+		log.Fatal("checksOverlaps #3 failed, should overlap")
+	}
+}
