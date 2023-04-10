@@ -10,9 +10,9 @@ Service sends data from an external room sensor to a thermostatic radiator valve
 ```bash
 go run cmd/tss/main.go \
 --broker 'tcp://localhost:1883' \
---sensor-topic 'myhome-kr/livingroom/son-sns-01' \
---trv-topic 'myhome-kr/livingroom/danfoss-thermo-01' \
---cron '*/15 * * * *'
+--cron '*/15 * * * *' \
+--sync '{ "sensor-topic": "myhome-kr/livingroom/son-sns-01", "trv-topic": "myhome-kr/livingroom/danfoss-thermo-01" }' \
+--sync '{ "sensor-topic": "myhome-kr/livingroom/son-sns-02", "trv-topic": "myhome-kr/livingroom/danfoss-thermo-02" }' 
 ```
 
 ## TSC (Temperature scheduler)
